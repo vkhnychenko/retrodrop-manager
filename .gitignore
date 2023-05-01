@@ -1,0 +1,14 @@
+.idea
+.vscode
+.env
+coverage
+coverage.json
+typechain
+node_modules
+
+#Hardhat files
+cache
+artifacts
+
+#client
+data/*
