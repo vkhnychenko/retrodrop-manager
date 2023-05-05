@@ -6,9 +6,7 @@ import { Connection } from "../src/helpers/provider.js"
 import { Inch } from "../src/swaps/inch.js";
 import { readAccountsFromTextFile } from "../src/helpers/readers.js"
 import { NETWORKS } from "../config/constants.js"
-
-const CHAIN_NAME = 'ETHEREUM_GOERLI'
-const AMOUNT = 0.1
+import { CHAIN_NAME, RPC_TYPE, AMOUNT_FROM, AMOUNT_TO, AMOUNT_FOR_BRIDGE } from "../config/config.js";
 
 async function main(){
 
@@ -22,7 +20,7 @@ async function main(){
 
     for (let account of accounts) {
         if (account.address && account.privateKey){
-            const ethConnection = new Connection(CHAIN_NAME, account.privateKey)
+            const ethConnection = new Connection(CHAIN_NAME, account.privateKey, RPC_TYPE)
             await ethConnection.getGasPrice()
             const ethBalance = await ethConnection.getNativeBalance()
             const zkSyncWallet = new zksync.Wallet(account.privateKey, zkSyncProvider, ethConnection.provider);
@@ -33,8 +31,7 @@ async function main(){
             const finalizedEthBalance = await zkSyncWallet.getBalance(zksync.utils.ETH_ADDRESS, "finalized");
             console.log('start finalizedEthBalance', ethers.utils.formatEther(finalizedEthBalance))
 
-
-            if (ethBalance > AMOUNT && committedEthBalance < AMOUNT && finalizedEthBalance < AMOUNT){
+            if (ethBalance > AMOUNT_FOR_BRIDGE && committedEthBalance < AMOUNT_FOR_BRIDGE && finalizedEthBalance < AMOUNT_FOR_BRIDGE){
                 const deposit = await zkSyncWallet.deposit({
                     token: zksync.utils.ETH_ADDRESS,
                     amount: ethers.utils.parseEther(AMOUNT.toString()),

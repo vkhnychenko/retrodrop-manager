@@ -27,23 +27,32 @@ export class Inch {
     }
 
     async healthCheck() {
-        const url = this.apiRequestUrl('/healthcheck')
-        const response = await axios({
-            method: 'get',
-            url,
-            responseType: 'json'
-        })
-        return response.status
+        try{
+            const url = this.apiRequestUrl('/healthcheck')
+            const response = await axios({
+                method: 'get',
+                url,
+                responseType: 'json'
+            })
+            return response.status
+        } catch (e){
+            console.log(`Error while healthcheck`, e.message)
+        }
+        
     }
 
     async checkAllowance() {
-        const url = this.apiRequestUrl('/approve/allowance', {tokenAddress: this.fromToken.address, walletAddress: this.connection.wallet.address})
-        const response = await axios({
-            method: 'get',
-            url,
-            responseType: 'json'
-        })
-        return response.data.allowance
+        try{
+            const url = this.apiRequestUrl('/approve/allowance', {tokenAddress: this.fromToken.address, walletAddress: this.connection.wallet.address})
+            const response = await axios({
+                method: 'get',
+                url,
+                responseType: 'json'
+            })
+            return response.data.allowance
+        } catch (e){
+            console.log(`Error while checkAllowance`, e.message)
+        }
     }
 
     // not use
@@ -71,15 +80,20 @@ export class Inch {
 
     //TODO
     async buildTxForApproveTradeWithRouter(amount) {
-        const url = apiRequestUrl('/approve/transaction', amount ? {tokenAddress: this.fromToken.address, amount} : {tokenAddress: this.fromToken.address})
+        try{
+            const url = apiRequestUrl('/approve/transaction', amount ? {tokenAddress: this.fromToken.address, amount} : {tokenAddress: this.fromToken.address})
 
-        const response = await axios({
-            method: 'get',
-            url,
-            responseType: 'json'
-        })
+            const response = await axios({
+                method: 'get',
+                url,
+                responseType: 'json'
+            })
 
-        console.log('response', response)
+            console.log('response', response)
+        } catch (e){
+            console.log(`Error while checkAllowance`, e.message)
+        }
+        
 
         // const transaction = await fetch(url).then(res => res.json());
 
@@ -95,13 +109,20 @@ export class Inch {
     }
 
     async buildTxForSwap(swapParams) {
-        const url = this.apiRequestUrl('/swap', swapParams);
-        const response = await axios({
-            method: 'get',
-            url,
-            responseType: 'json'
-        })
-        return response.data.tx
+        try{
+            const url = this.apiRequestUrl('/swap', swapParams);
+            console.log(url)
+            const response = await axios({
+                method: 'get',
+                url,
+                responseType: 'json'
+            })
+            console.log(response)
+            return response.data.tx
+        } catch (e){
+            console.log(`Error while buildTxForSwap`, e.message)
+        }
+        
     }
 
     async swap(){
@@ -134,8 +155,10 @@ export class Inch {
         }
         
         const swapTransaction = await this.buildTxForSwap(swapParams);
+
+        console.log(swapTransaction)
         
-        swapTransaction.gasLimit = swapTransaction.gas
+        swapTransaction.gasLimit = 2500000
         swapTransaction.nonce = await this.getNonce()
         delete swapTransaction.gas
         console.log('Transaction for swap: ', swapTransaction);

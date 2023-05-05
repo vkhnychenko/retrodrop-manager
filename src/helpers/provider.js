@@ -3,7 +3,7 @@ import { NETWORKS, ERC20_ABI } from "../../config/constants.js"
 import { INFURA_API_KEY } from "../../config/config.js"
 
 export class Connection {
-    constructor(chainName, privateKey, rpcType = 'INFURA', rpcKey = INFURA_API_KEY) {
+    constructor(chainName, privateKey, rpcType = 'DEFAULT', rpcKey = INFURA_API_KEY) {
         this.rpcType = rpcType
         this.chainName = chainName
         this.rpcKey = rpcKey
@@ -12,13 +12,15 @@ export class Connection {
     }
 
     get rpc(){
-        if (this.rpcType == 'INFURA'){
-            return this.chain.infuraRpc.replace('api_key', this.rpcKey)
-        } else if (this.rpcType == 'ALCHEMY') {
-            return this.chain.alchemyRpc.replace('api_key', this.rpcKey)
-        } else {
-            return this.chain.defaultRpc
-        }
+        // TODO
+        // if (this.rpcType == 'INFURA'){
+        //     return this.chain.infuraRpc.replace('api_key', this.rpcKey)
+        // } else if (this.rpcType == 'ALCHEMY') {
+        //     return this.chain.alchemyRpc.replace('api_key', this.rpcKey)
+        // } else {
+        //     return this.chain.defaultRpc
+        // }
+        return this.chain.rpc
     }
 
     get provider(){
@@ -30,7 +32,9 @@ export class Connection {
     }
 
     async getGasPrice(){
-        return ethers.utils.formatUnits(await this.provider.getGasPrice(), 'gwei')
+        const gasPrice = await this.provider.getGasPrice()
+        console.log('gasPrice', ethers.utils.formatUnits(gasPrice, 'gwei'))
+        return gasPrice
     }
 
     async getNativeBalance(){
@@ -40,14 +44,22 @@ export class Connection {
         return balance
     }
 
-    async getTokenBalance(tokenAddress){
+    async getTokenInfo(tokenAddress){
 
-        const currencyContract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
-        const decimals = await currencyContract.decimals()
-        const symbol = await currencyContract.symbol()
-        const balance = ethers.utils.formatUnits(await currencyContract.balanceOf(this.wallet.address), decimals)
-        console.log(`${symbol} balance: ${balance}`)
+        const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+        const tokenDecimals = await tokenContract.decimals()
+        const tokenSymbol = await tokenContract.symbol()
+        const rawTokenBalance = await tokenContract.balanceOf(this.wallet.address)
+        console.log(`${tokenSymbol} balance: ${ethers.utils.formatUnits(rawTokenBalance, tokenDecimals)}`)
       
-        return balance
-      }
+        return {tokenSymbol, tokenDecimals, rawTokenBalance}
+    }
+
+    async getNonce(){
+        return await this.wallet.getTransactionCount()
+    }
+
+    async sendTransaction({}){
+
+    }
 }

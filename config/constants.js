@@ -1,9 +1,13 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import { INFURA_API_KEY } from "./config.js"
+
+export const STARGATE_FINANCE_ROUTER_ARBITRUM = '0x53Bf833A5d6c4ddA888F69c22C88C9f356a41614'
+export const STARGATE_FINANCE_ROUTER_BNB = '0x4a364f8c717caad9a442737eb7b8a55cc6cf18d8'
+export const USDT_BSC_ADDRESS = '0x55d398326f99059fF775485246999027B3197955'
+export const USDT_ARBITRUM_ADDRESS = '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'
 
 export const NETWORKS = {
     ARBITRUM: {
-        infuraRpc: `https://arbitrum-mainnet.infura.io/v3/api_key`,
+        rpc: `https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 42161,
         symbol: "ETH",
         explorer: "https://arbiscan.io/",
@@ -42,42 +46,49 @@ export const NETWORKS = {
         ]
       },
     ARBITRUM_GOERLI: {
-        infuraRpc: `https://arbitrum-goerli.infura.io/v3/api_key`,
+        rpc: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 421613,
         symbol: "AGOR",
         explorer: "https://arbiscan.io/",
         name: "ArbitrumGoerli",
     },
     POLYGON: {
-        infuraRpc: `https://polygon-mainnet.infura.io/v3/api_key`,
+        rpc: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 137,
         symbol: "MATIC",
         explorer: "https://arbiscan.io/",
         name: "Polygon",
     },
     ETHEREUM: {
-        infuraRpc: `https://mainnet.infura.io/v3/api_key`,
+        rpc: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 1,
         symbol: "ETH",
         explorer: "https://etherscan.io/",
         name: "Ethereum",
     },
     ETHEREUM_GOERLI: {
-        infuraRpc: `https://goerli.infura.io/v3/api_key`,
+        rpc: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 5,
         symbol: "ETH",
         explorer: "https://goerli.etherscan.io/",
         name: "EthereumGoerli",
     },
+    BSC: {
+        rpc: `https://bsc-dataseed3.defibit.io`,
+        chainId: 56,
+        symbol: "BNB",
+        explorer: "https://explorer.zksync.io",
+        name: "BSC"
+    },
     LINEA: {
-        infuraRpc: `https://consensys-zkevm-goerli-prealpha.infura.io/v3/api_key`,
+        rpc: `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 59140,
         symbol: "ETH",
         explorer: "https://goerli.etherscan.io/",
         name: "Linea",
     },
     ZK_SYNC: {
-        defaultRpc: `https://zksync2-mainnet.zksync.io`,
+        rpc: `https://zksync2-mainnet.zksync.io`,
         chainId: 324,
         symbol: "ETH",
         explorer: "https://explorer.zksync.io",
