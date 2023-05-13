@@ -11,10 +11,14 @@ export const AMOUNT_FOR_BRIDGE = 0.01
 export const MIN_AMOUNT_SWAP = 0 // если баланс будет меньше этого числа, свапать не будет
 export const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
 export const TELEGRAM_IDS = process.env.TELEGRAM_IDS.split(',')
+export const IS_SLEEP = true
+export const SLEEP_FROM = 100; // seconds
+export const SLEEP_TO = 200; // seconds
 
 //stargate finance
 export const AMOUNT_FROM_STAKE_STARGATE = 50
 export const AMOUNT_TO_STAKE_STARGATE = 65
+export const MIN_TOKEN_BALANCE = 30
 
 export const SLIPPAGE = 5  // 5 = 0.5%, 10 = 1%, 1 = 0.1%
 

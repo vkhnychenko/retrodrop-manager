@@ -1,6 +1,7 @@
 import { ethers } from "ethers"
 import { NETWORKS, ERC20_ABI } from "../../config/constants.js"
 import { INFURA_API_KEY } from "../../config/config.js"
+import { sendMessageToTelegram } from "../telegramBot.js"
 
 export class Connection {
     constructor(chainName, privateKey, rpcType = 'DEFAULT', rpcKey = INFURA_API_KEY) {
@@ -38,10 +39,11 @@ export class Connection {
     }
 
     async getNativeBalance(){
-        const balance = ethers.utils.formatEther(await this.provider.getBalance(this.wallet.address))
-        console.log(`native balance for address: ${this.wallet.address} - ${balance}`, )
+        const rawNativeBalance = await this.provider.getBalance(this.wallet.address)
+        const nativeBalance = ethers.utils.formatEther(rawNativeBalance)
+        console.log(`native balance for address: ${this.wallet.address} - ${nativeBalance}`, )
         
-        return balance
+        return {rawNativeBalance, nativeBalance}
     }
 
     async getTokenInfo(tokenAddress){
@@ -50,16 +52,48 @@ export class Connection {
         const tokenDecimals = await tokenContract.decimals()
         const tokenSymbol = await tokenContract.symbol()
         const rawTokenBalance = await tokenContract.balanceOf(this.wallet.address)
-        console.log(`${tokenSymbol} balance: ${ethers.utils.formatUnits(rawTokenBalance, tokenDecimals)}`)
+        const tokenBalance = ethers.utils.formatUnits(rawTokenBalance, tokenDecimals)
+        console.log(`${tokenSymbol} balance: ${tokenBalance} for address: ${this.wallet.address}`)
       
-        return {tokenSymbol, tokenDecimals, rawTokenBalance}
+        return {tokenSymbol, tokenDecimals, rawTokenBalance, tokenBalance}
     }
 
     async getNonce(){
         return await this.wallet.getTransactionCount()
     }
 
-    async sendTransaction({}){
-
+    async sendTransaction({ method, params, value, gasLimit, chainName }){
+        console.log('params', ...params)
+        const gasPrice = await this.getGasPrice()
+        const nonce = await this.getNonce()
+        
+        const {rawNativeBalance, nativeBalance} = await this.getNativeBalance()
+        console.log('gasLimit', gasLimit)
+        const needGas = gasPrice * gasLimit * 1.1
+        console.log('raw native balance', +rawNativeBalance )
+        console.log('needGas', needGas )
+        if (+rawNativeBalance < needGas){
+            console.log('Gas not enough')
+            await sendMessageToTelegram(`Недостаточно баланса для оплаты газа в сети ${chainName} для адреса ${this.wallet.address} - текущий баланс ${nativeBalance} - необходимо для транзакции: ${ethers.utils.formatEther(needGas)}`)
+            return
+        }
+        console.log(`Start transaction for wallet: ${this.wallet.address} in network: ${chainName}, gas: ${gasPrice}, gasLimit: ${gasLimit} - nonce: ${nonce}`)
+        try{
+            const tx = await method(...params, {
+                'from': this.wallet.address,
+                value,
+                // gasLimit,
+                gasPrice,
+                nonce
+            })
+            console.log('tx', tx)
+            const receipt = await tx.wait();
+            console.log("receipt: ", receipt);
+            console.log("status: ", receipt.status);
+            return receipt.status
+        } catch(e){
+            console.log(`Error while send transaction`, e.message)
+            await sendMessageToTelegram(`Ошибка при выполнении транзакции с параметрами ${params} для адреса ${this.wallet.address} в сети ${chainName}`)
+        }
     }
 }

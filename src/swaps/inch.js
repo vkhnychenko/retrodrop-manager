@@ -5,7 +5,7 @@ import randomFloat from 'random-float'
 import { Connection } from "../helpers/provider.js"
 import { NETWORKS, ERC20_ABI, DEFAULT_ETH_TOKEN } from "../../config/constants.js"
 import { AMOUNT_FROM, AMOUNT_TO, SWAP_ALL_BALANCE } from "../../config/config.js"
-import { randomInt } from "../helpers/common.js"
+import { randomIntInRange } from "../helpers/common.js"
 
 export class Inch {
     constructor({chainName, privateKey, rpcType, fromToken = DEFAULT_ETH_TOKEN, toTokenAddress}) {

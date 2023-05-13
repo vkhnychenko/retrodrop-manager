@@ -2,17 +2,21 @@ import { INFURA_API_KEY } from "./config.js"
 
 export const STARGATE_FINANCE_ROUTER_ARBITRUM = '0x53Bf833A5d6c4ddA888F69c22C88C9f356a41614'
 export const STARGATE_FINANCE_ROUTER_BNB = '0x4a364f8c717caad9a442737eb7b8a55cc6cf18d8'
-export const USDT_BSC_ADDRESS = '0x55d398326f99059fF775485246999027B3197955'
-export const USDT_ARBITRUM_ADDRESS = '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'
 
 export const NETWORKS = {
     ARBITRUM: {
         rpc: `https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 42161,
         symbol: "ETH",
-        explorer: "https://arbiscan.io/",
+        explorerApiUrl: `https://api.arbiscan.io/api`,
+        explorerApiKey: process.env.ETHERSCAN_ARBITRUM_API_KEY,
         name: "Arbitrum",
         tokens: [
+            {
+                symbol: 'USDT',
+                address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+                decimals: 6
+            },
             // {
             //   'symbol': 'USDC',
             //   'address': '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
@@ -45,47 +49,88 @@ export const NETWORKS = {
             },
         ]
       },
-    ARBITRUM_GOERLI: {
-        rpc: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
-        chainId: 421613,
-        symbol: "AGOR",
-        explorer: "https://arbiscan.io/",
-        name: "ArbitrumGoerli",
-    },
     POLYGON: {
         rpc: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 137,
         symbol: "MATIC",
-        explorer: "https://arbiscan.io/",
+        explorerApiUrl: `https://api.polygonscan.com/api`,
+        explorerApiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
         name: "Polygon",
+        tokens: [
+            {
+                symbol: 'USDC',
+                address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+                decimals: 6
+            },
+            {
+                symbol: 'USDT',
+                address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+                decimals: 6
+            }
+        ]
     },
     ETHEREUM: {
         rpc: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
         chainId: 1,
         symbol: "ETH",
-        explorer: "https://etherscan.io/",
+        explorerApiUrl: `https://api.etherscan.io/api`,
+        explorerApiKey: process.env.ETHERSCAN_ETH_API_KEY,
         name: "Ethereum",
-    },
-    ETHEREUM_GOERLI: {
-        rpc: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
-        chainId: 5,
-        symbol: "ETH",
-        explorer: "https://goerli.etherscan.io/",
-        name: "EthereumGoerli",
+        tokens: []
     },
     BSC: {
         rpc: `https://bsc-dataseed3.defibit.io`,
         chainId: 56,
         symbol: "BNB",
-        explorer: "https://explorer.zksync.io",
-        name: "BSC"
+        explorerApiUrl: `https://api.bscscan.com/api`,
+        explorerApiKey: process.env.ETHERSCAN_BSC_API_KEY,
+        name: "BSC",
+        tokens: [
+            {
+                symbol: 'USDT',
+                address: '0x55d398326f99059fF775485246999027B3197955',
+                decimals: 18
+            },
+        ]
     },
-    LINEA: {
-        rpc: `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${INFURA_API_KEY}`,
-        chainId: 59140,
+    OPTIMISM: {
+        rpc: `https://optimism-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+        chainId: 10,
         symbol: "ETH",
-        explorer: "https://goerli.etherscan.io/",
-        name: "Linea",
+        name: "Optimism",
+        explorerApiUrl: `https://api-optimistic.etherscan.io/api`,
+        explorerApiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+        tokens: [
+            {
+                symbol: 'USDC',
+                address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+                decimals: 6
+            }
+        ]
+    },
+    FANTOM: {
+        rpc: `https://fantom.publicnode.com`,
+        chainId: 250,
+        symbol: "FTM",
+        name: "Fantom",
+        explorerApiUrl: `https://api.ftmscan.com/api/`,
+        explorerApiKey: process.env.ETHERSCAN_FTM_API_KEY,
+        tokens: []
+    },
+    AVAX: {
+        rpc: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+        chainId: 43114,
+        symbol: "AVAX",
+        name: "Avalanche",
+        explorerApiUrl: `https://api.snowtrace.io/api/`,
+        explorerApiKey: process.env.ETHERSCAN_SNOWTRACE_API_KEY,
+        tokens: [
+            {
+                symbol: 'USDC',
+                address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
+                decimals: 6
+            }
+        ]
     },
     ZK_SYNC: {
         rpc: `https://zksync2-mainnet.zksync.io`,
@@ -100,7 +145,31 @@ export const NETWORKS = {
                 decimals: 6
             }
         ]
-    }
+    },
+    LINEA: {
+        rpc: `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${INFURA_API_KEY}`,
+        chainId: 59140,
+        symbol: "ETH",
+        explorer: "https://goerli.etherscan.io/",
+        name: "Linea",
+        tokens: []
+    },
+    ARBITRUM_GOERLI: {
+        rpc: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
+        chainId: 421613,
+        symbol: "AGOR",
+        explorer: "https://arbiscan.io/",
+        name: "ArbitrumGoerli",
+        tokens: []
+    },
+    ETHEREUM_GOERLI: {
+        rpc: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
+        chainId: 5,
+        symbol: "ETH",
+        explorer: "https://goerli.etherscan.io/",
+        name: "EthereumGoerli",
+        tokens: []
+    },
 }
 
 export const DEFAULT_ETH_TOKEN = {
