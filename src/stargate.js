@@ -12,62 +12,63 @@ import { Etherscan } from "./etherscan.js";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const TIME = 604800 // week in sec
 
-const destinationChainIdMapping = {
-    ARBITRUM: 110,
-    BSC: 102,
-    OPTIMISM: 111,
-    POLYGON: 109,
-    AVAX: 106,
-    FANTOM: 112,
+const destinationChainMapping = {
+    ARBITRUM: {chainId: 110, poolId: 2},
+    BSC: {chainId: 102, poolId: 2},
+    OPTIMISM: {chainId: 111, poolId: 1},
+    POLYGON: {chainId: 109, poolId: 2},
+    AVAX: {chainId: 106, poolId: 2},
+    FANTOM: {chainId: 112, poolId: 1},
+} 
+
+const sourcePoolMapping = {
+    USDT: 2,
+    USDC: 1,
 } 
 
 const chainInfoMapping = {
     OPTIMISM: {
         routerContractAddress: '0xb0d502e938ed5f4df2e681fe6e419ff29631d62b',
+        stakingContractAddress: '0x4dea9e918c6289a52cd469cac652727b7b412cd2',
         gasLimit: 600_000,
-        pools: [],
-        liquidityPools: []
+        pools: [
+            {liquidityPoolId: 1, stakingPoolId: 0 , tokenName: 'USDC', LPTokenAddress: '0xDecC0c09c3B5f6e92EF4184125D5648a66E35298', tokenDecimals: 6}
+        ],
     },
     ARBITRUM: {
         routerContractAddress: '0x53Bf833A5d6c4ddA888F69c22C88C9f356a41614',
         stakingContractAddress: '0xea8dfee1898a7e0a59f7527f076106d7e44c2176',
         gasLimit: 3_000_000,
         pools: [
-            {poolId: 1, tokenName: 'USDT', LPTokenAddress: '0xB6CfcF89a7B22988bfC96632aC2A9D6daB60d641', tokenDecimals: 6}
+            {liquidityPoolId: 2, stakingPoolId: 1, tokenName: 'USDT', LPTokenAddress: '0xB6CfcF89a7B22988bfC96632aC2A9D6daB60d641', tokenDecimals: 6}
         ],
-        liquidityPools: [
-            {poolId: 2, tokenName: 'USDT', LPTokenAddress: '0xB6CfcF89a7B22988bfC96632aC2A9D6daB60d641', tokenDecimals: 6}
-        ]
-
     },
     BSC: {
         routerContractAddress: '0x4a364f8c717caad9a442737eb7b8a55cc6cf18d8',
         stakingContractAddress: '0x3052a0f6ab15b4ae1df39962d5ddefaca86dab47',
         gasLimit: 350_000,
         pools: [
-            {liquidityPoolId: 2, stakingPoolId: 0, tokenName: 'USDT', LPTokenAddress: '0x9aA83081AA06AF7208Dcc7A4cB72C94d057D2cda', tokenDecimals: 6}
+            {liquidityPoolId: 2, stakingPoolId: 0, tokenName: 'USDT', LPTokenAddress: '0x9aA83081AA06AF7208Dcc7A4cB72C94d057D2cda', tokenDecimals: 6},
         ],
-        liquidityPools: []
     },
     POLYGON: {
         routerContractAddress: '0x45a01e4e04f14f7a4a6702c74187c5f6222033cd',
         gasLimit: 500_000,
         pools: [],
-        liquidityPools: []
     },
     AVAX: {
         routerContractAddress: '0x45a01e4e04f14f7a4a6702c74187c5f6222033cd',
+        stakingContractAddress: '0x8731d54e9d02c286767d56ac03e8037c07e01e98',
         gasLimit: 450_000,
-        pools: [],
-        liquidityPools: []
+        pools: [
+            {liquidityPoolId: 1, stakingPoolId: 0, tokenName: 'USDC', LPTokenAddress: '0x1205f31718499dBf1fCa446663B532Ef87481fe1', tokenDecimals: 6}
+        ],
     },
     FANTOM:{
         routerContractAddress: '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6',
         gasLimit: 600_000,
         pools: [],
-        liquidityPools: []
     }
-    
 } 
 
 
@@ -100,14 +101,14 @@ export class Stargate {
                 }
             }
 
-            for (const pool of value.liquidityPools){
-                if (pool.tokenName == 'USDT' || pool.tokenName == 'USDC'){
-                    const {tokenBalance} = await connection.getTokenInfo(pool.LPTokenAddress)
-                    if (+tokenBalance > MIN_TOKEN_BALANCE){
-                        isReady = true
-                    }
-                }
-            }
+            // for (const pool of value.liquidityPools){
+            //     if (pool.tokenName == 'USDT' || pool.tokenName == 'USDC'){
+            //         const {tokenBalance} = await connection.getTokenInfo(pool.LPTokenAddress)
+            //         if (+tokenBalance > MIN_TOKEN_BALANCE){
+            //             isReady = true
+            //         }
+            //     }
+            // }
         }
         console.log(`balance is ready: ${isReady}  for wallet: ${walletAddress}`)
         if (!isReady){
@@ -116,7 +117,7 @@ export class Stargate {
         return isReady
     }
 
-    async checkTimestamp(){
+    async checkTimestampForSwap(){
         console.log('start check timestamp')
         let isReady = false
         let walletAddress = ''
@@ -177,23 +178,26 @@ export class Stargate {
     }
 
     async randomSwap(){
-        const randomAmount = randomIntInRange(AMOUNT_FROM_STAKE_STARGATE, AMOUNT_TO_STAKE_STARGATE)
-        console.log(destinationChainIdMapping.length)
-        const randomDestination = Object.keys(destinationChainIdMapping)[randomIntInRange(0, Object.keys(destinationChainIdMapping).length - 1)]
-        console.log('randomAmount', randomAmount)
-        console.log('randomDestination', randomDestination)
         for (const [chainName, value] of Object.entries(NETWORKS)){
             const connection = await this.getConnection({chainName})
             for (const token of value.tokens){
+                const tokenSymbol = token.symbol
                 // TODO
-                if (token.symbol == 'USDT'){
+                if (token.symbol == 'USDT' || token.symbol == 'USDC'){
                     const {rawTokenBalance, tokenBalance, tokenDecimals} = await connection.getTokenInfo(token.address)
                     console.log('tokenBalance', +tokenBalance)
                     if (+tokenBalance > MIN_TOKEN_BALANCE){
                         console.log(`swap for network: ${chainName}`)
-                        const result = await this.swap({amountToSwap: randomAmount, chainFrom: chainName, chainTo: randomDestination, tokenAddress: token.address, tokenBalance, tokenDecimals})
+                        const randomAmount = randomIntInRange(AMOUNT_FROM_STAKE_STARGATE, AMOUNT_TO_STAKE_STARGATE).toFixed(tokenDecimals)
+                        const destinationChains = Object.keys(destinationChainMapping).filter(key => key != chainName)
+                        console.log('destinationChains', destinationChains)
+                        const randomDestination = destinationChains[randomIntInRange(0, destinationChains.length - 1)]
+                        console.log('randomAmount', randomAmount)
+                        console.log('randomDestination', randomDestination)
+                        const result = await this.swap({amountToSwap: randomAmount, chainFrom: chainName, chainTo: randomDestination, tokenAddress: token.address, tokenBalance, tokenDecimals, tokenSymbol})
                         if (result){
                             console.log('next deposit')
+                            return
                         } 
                     }
                 }
@@ -202,7 +206,7 @@ export class Stargate {
         // const destinationChainId = Object.entries(NETWORKS).filter(([key, value]) => value. == chainTo)[0][1]
     }
 
-    async swap({amountToSwap, chainFrom, chainTo, tokenAddress, tokenBalance, tokenDecimals}){
+    async swap({amountToSwap, chainFrom, chainTo, tokenAddress, tokenBalance, tokenDecimals, tokenSymbol}){
         const connection = await this.getConnection({chainName: chainFrom})
 
         const chainInfo = chainInfoMapping[chainFrom]
@@ -217,8 +221,10 @@ export class Stargate {
             amountToSwap = tokenBalance
         }
 
-        const destinationChainId = destinationChainIdMapping[chainTo]
+        const destinationChainId = destinationChainMapping[chainTo].chainId
+        const destPoolId = destinationChainMapping[chainTo].poolId
         console.log('destinationChainId', destinationChainId)
+        console.log('destPoolId', destPoolId)
         
         const fees = await stargateRouterContract.quoteLayerZeroFee(destinationChainId, 1, "0x0000000000000000000000000000000000001010", "0x", [0, 0, "0x0000000000000000000000000000000000000001"])
         const fee = fees[0]
@@ -232,14 +238,15 @@ export class Stargate {
                 console.log('check allowance status', checkAllowance)
                 return false
             }
-            //TODO
-            //const sourcePoolId = 1 //USDC
-            //const destPoolId = 1 //USDC
-            const sourcePoolId = 2 //USDT
-            const destPoolId = 2 //USDT
+            const sourcePoolId = sourcePoolMapping[tokenSymbol]
+            console.log('sourcePoolId', sourcePoolId)
+            
             const refundAddress = connection.wallet.address
-            const amountIn = ethers.utils.parseUnits(amountToSwap.toString(), tokenDecimals) 
-            const amountOutMin = ethers.utils.parseUnits((amountToSwap - (amountToSwap * SLIPPAGE) / 1000).toString(), tokenDecimals)
+            const amountIn = ethers.utils.parseUnits(amountToSwap, tokenDecimals) 
+            console.log('amountIn', +amountIn)
+            console.log('amountToSwap - amountToSwap * SLIPPAGE / 1000)', (amountToSwap - amountToSwap * SLIPPAGE / 1000).toFixed(tokenDecimals))
+            const amountOutMin = ethers.utils.parseUnits((amountToSwap - amountToSwap * SLIPPAGE / 1000).toFixed(tokenDecimals), tokenDecimals)
+            console.log('amountOutMin', amountOutMin)
             const lzTxObj = [0, 0, '0x0000000000000000000000000000000000000001']
             const to = connection.wallet.address
             const data = '0x'
@@ -253,6 +260,10 @@ export class Stargate {
 
             return true
         }
+    }
+
+    async checkLiquidity(){
+
     }
 
     async addLiquidity({chainName, tokenAddress}){

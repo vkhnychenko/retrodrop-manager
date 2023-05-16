@@ -15,7 +15,7 @@ async function main(){
         if (account.privateKey){
             const stargate = new Stargate({privateKey: account.privateKey})
 
-            const timestampIsReady = await stargate.checkTimestamp()
+            const timestampIsReady = await stargate.checkTimestampForSwap()
             if (!timestampIsReady){
                 continue
             }
@@ -24,7 +24,8 @@ async function main(){
                 continue
             }
             
-            // await stargate.randomSwap()
+            await stargate.randomSwap()
+            // await stargate.addLiquidity()
             if (IS_SLEEP) {
                 let sle = randomIntInRange(SLEEP_FROM, SLEEP_TO);
                 console.log(`Задержка ${sle}с..`)

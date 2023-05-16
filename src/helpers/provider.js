@@ -69,7 +69,7 @@ export class Connection {
         
         const {rawNativeBalance, nativeBalance} = await this.getNativeBalance()
         console.log('gasLimit', gasLimit)
-        const needGas = gasPrice * gasLimit * 1.1
+        const needGas = gasPrice * gasLimit * 1.1 + +value
         console.log('raw native balance', +rawNativeBalance )
         console.log('needGas', needGas )
         if (+rawNativeBalance < needGas){
