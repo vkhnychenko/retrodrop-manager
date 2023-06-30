@@ -9,10 +9,11 @@ export class Etherscan {
     async getLastTransactionTimestamp({address, chainName}){
         const txList = await this.getListTransactions({chainName})
         const txn = txList.filter((obj) => obj.to == address.toLowerCase())
+        // console.log('txn', txn)
         const lastTx = txn[txn.length - 1]
-        console.log('lastTx', lastTx)
+        // console.log('lastTx', lastTx)
         if (typeof lastTx === 'undefined'){
-            return
+            return undefined
         }
         return lastTx.timeStamp
     }

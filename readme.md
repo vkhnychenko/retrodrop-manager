@@ -1,6 +1,6 @@
-* Retrodrop-manager
+# Retrodrop-manager
 
-** .env
+** ENV
 - INFURA_API_KEY
 - TELEGRAM_TOKEN
 - COINMARKET_API_KEY
@@ -13,3 +13,8 @@
 - ETHERSCAN_SNOWTRACE_API_KEY
 - ETHERSCAN_MOONRIVER_API_KEY
 - ETHERSCAN_GNOSIS_API_KEY
+
+
+## TODO
+- woofi
+- STG staking
